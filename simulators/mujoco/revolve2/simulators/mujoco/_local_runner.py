@@ -8,6 +8,7 @@ import mujoco
 import mujoco_viewer
 import numpy as np
 import numpy.typing as npt
+import matplotlib.pyplot as plt
 
 try:
     import logging
@@ -87,10 +88,15 @@ class LocalRunner(Runner):
         sample_step: float,
         simulation_time: int | None,
         simulation_timestep: float,
+        addSensor: bool,
+        sensorConfig: list[dict] | None,
     ) -> EnvironmentResults:
+        sensordata = []
+        times = []
+
         logging.info(f"Environment {env_index}")
 
-        model = cls._make_model(env_descr, simulation_timestep)
+        model = cls._make_model(env_descr, simulation_timestep, addSensor, sensorConfig)
 
         data = mujoco.MjData(model)
 
@@ -173,6 +179,10 @@ class LocalRunner(Runner):
                 record_settings is not None and time >= last_video_time + video_step
             ):
                 viewer.render()
+                for sensor_param in sensorConfig: 
+                    sensor_type =sensor_param.get('type')
+                sensordata.append(data.sensor(sensor_type).data.copy())
+                times.append(data.time)
 
             # capture video frame if it's time
             if record_settings is not None and time >= last_video_time + video_step:
@@ -204,6 +214,8 @@ class LocalRunner(Runner):
             EnvironmentState(time, cls._get_actor_states(env_descr, data, model))
         )
 
+        cls._plot_sensordata(sensordata, times)
+        
         return results
 
     async def run_batch(
@@ -239,6 +251,8 @@ class LocalRunner(Runner):
                     sample_step,
                     batch.simulation_time,
                     batch.simulation_timestep,
+                    batch.addSensor,
+                    batch.sensorConfig,
                 )
                 for env_index, env_descr in enumerate(batch.environments)
             ]
@@ -250,7 +264,10 @@ class LocalRunner(Runner):
 
     @staticmethod
     def _make_model(
-        env_descr: Environment, simulation_timestep: float = 0.001
+        env_descr: Environment,
+        simulation_timestep: float = 0.001,
+        addSensor: bool = False,
+        sensorConfig: list[dict] | None = None,
     ) -> mujoco.MjModel:
         env_mjcf = mjcf.RootElement(model="environment")
 
@@ -389,6 +406,28 @@ class LocalRunner(Runner):
                 posed_actor.orientation.z,
             ]
 
+            if addSensor and sensorConfig:
+                # Add the site to the robot body
+                robot.worldbody.add(
+                    "site",
+                    name="robot_0_site",
+                    size=".01",
+                    pos="0.05 0.05 0.035"
+                )
+
+                for sensor_params in sensorConfig:
+                    # Add sensors based on the provided configuration
+                    sensor_type = sensor_params.get("type")
+                    sensor_name = sensor_params.get("name")
+
+                    if sensor_type and sensor_name:
+                        env_mjcf.sensor.add(
+                            sensor_type,
+                            name=sensor_name,
+                            site="robot_0/robot_0_site",
+                        )
+
+
         xml = env_mjcf.to_xml_string()
         if not isinstance(xml, str):
             raise RuntimeError("Error generating mjcf xml.")
@@ -462,3 +501,13 @@ class LocalRunner(Runner):
             data.qvel[
                 qindex : qindex + model.jnt_dofadr[i + 1]
             ] = 0.0  # Again, skip free joint.
+
+    @staticmethod
+    def _plot_sensordata(sensorData: list, times: list):
+        ax = plt.gca()
+        ax.plot(np.asarray(times), np.asarray(sensorData))
+        ax.set_title('Accelerometer values')
+        ax.set_ylabel('meter/second^2')
+        ax.set_xlabel('second')
+        plt.tight_layout()
+        plt.savefig('my_plot.png')

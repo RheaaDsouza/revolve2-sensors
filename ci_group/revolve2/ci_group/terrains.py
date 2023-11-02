@@ -154,3 +154,58 @@ def bowl_heightmap(
         num_edges,
         dtype=float,
     )
+
+def flat_with_box(
+    size: tuple[float, float],
+    ruggedness: float = 0.8,
+    curviness: float = 0.0,
+    granularity_multiplier: float = 1.0,
+    box_height: float = 1.0
+) -> Terrain:
+    r"""
+    Create a flat terrain with a box in the middle using a heightmap.
+
+    :param size: Size of the flat terrain and the box.
+    :param ruggedness: How coarse the ground is (set to 0 for flatness).
+    :param curviness: Height of the edges of the crater (set to 0 for flatness).
+    :param granularity_multiplier: Multiplier for how many edges are used in the heightmap.
+    :returns: The created terrain.
+    """
+    NUM_EDGES = 100  # arbitrary constant to get a nice number of edges
+
+    num_edges = (
+        int(NUM_EDGES * size[0] * granularity_multiplier),
+        int(NUM_EDGES * size[1] * granularity_multiplier),
+    )
+
+    max_height = ruggedness + curviness
+    if max_height == 0.0:
+        heightmap = np.zeros(num_edges)
+        max_height = 1.0
+    else:
+        heightmap = (ruggedness * np.zeros(num_edges) + curviness * np.zeros(num_edges)) / (ruggedness + curviness)
+
+    # Create a box-like structure in the middle
+    box_size = (size[0] * 3, size[1] * 3)  # Adjust the box size as needed 
+    #box_height = max_height   # Adjust the box height as needed
+
+    # box_start = (int((num_edges[0] - box_size[0]) / 2), int((num_edges[1] - box_size[1]) / 2))
+    box_start=(450,500)
+
+    box_end = (box_start[0] + int(box_size[0]), box_start[1] + int(box_size[1]))
+    # Set the height of the box using the box_height parameter
+    heightmap[box_start[0]:box_end[0], box_start[1]:box_end[1]] = box_height
+
+    terrain = Terrain(
+        static_geometry=[
+            geometry.Heightmap(
+                position=Vector3(),
+                orientation=Quaternion(),
+                size=Vector3([size[0], size[1], max_height]),
+                base_thickness=0.1 + ruggedness,
+                heights=heightmap,
+            )
+        ]
+    )
+
+    return terrain

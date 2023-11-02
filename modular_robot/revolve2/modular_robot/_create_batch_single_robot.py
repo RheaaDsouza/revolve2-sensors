@@ -11,6 +11,8 @@ def create_batch_single_robot(
     sampling_frequency: float,
     simulation_timestep: float,
     control_frequency: float,
+    addSensor: bool,
+    sensorConfig: list[dict] | None,
 ) -> Batch:
     """
     Create a batch for simulating a single robot.
@@ -31,6 +33,8 @@ def create_batch_single_robot(
         sampling_frequency=sampling_frequency,
         simulation_timestep=simulation_timestep,
         control_frequency=control_frequency,
+        addSensor=addSensor,
+        sensorConfig= sensorConfig,
     )
     batch.environments.append(env)
 

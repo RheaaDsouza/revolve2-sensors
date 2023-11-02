@@ -36,3 +36,7 @@ class Batch:
 
     environments: list[Environment] = field(default_factory=list, init=False)
     """The environments to simulate."""
+
+    addSensor: bool
+
+    sensorConfig: list[dict] | None
