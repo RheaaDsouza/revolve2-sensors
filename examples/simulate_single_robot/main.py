@@ -12,9 +12,11 @@ from revolve2.ci_group import terrains
 from revolve2.ci_group.logging import setup_logging
 from revolve2.ci_group.rng import make_rng
 from revolve2.ci_group.simulation import create_batch_single_robot_standard
-from revolve2.modular_robot import ActiveHinge, Body, Brick, ModularRobot, RightAngles
+from revolve2.modular_robot import Sensor, ActiveHinge, Body, Brick, ModularRobot, RightAngles
 from revolve2.modular_robot.brains import BrainCpgNetworkNeighborRandom
 from revolve2.simulators.mujoco import LocalRunner
+
+
 
 
 def make_body() -> Body:
@@ -33,11 +35,14 @@ def make_body() -> Body:
     # This can be any angle, although the original design takes into account only multiples of 90 degrees.
     body = Body()
     body.core.left = ActiveHinge(RightAngles.DEG_180)
-    body.core.left.attachment = ActiveHinge(RightAngles.DEG_180)
-    body.core.left.attachment.attachment = Brick(RightAngles.DEG_0)
+    body.core.left.attachment = Brick(RightAngles.DEG_180)
+    # body.core.left.attachment.attachment = Brick(RightAngles.DEG_180)
+    body.core.left.attachment.front = Sensor(RightAngles.DEG_0)
+
     body.core.right = ActiveHinge(RightAngles.DEG_180)
-    body.core.right.attachment = ActiveHinge(RightAngles.DEG_180)
-    body.core.right.attachment.attachment = Brick(RightAngles.DEG_0)
+    body.core.right.attachment = Brick(RightAngles.DEG_180)
+    # body.core.right.attachment.attachment = Brick(RightAngles.DEG_180)
+    body.core.right.attachment.front = Sensor(RightAngles.DEG_0)
     # A body needs to be finalized after building.
     # This sets some variables on each module that makes it easier to work with the body later.
     # Don't worry if you forget to the finalize; the framework will raise an error when you attempt to perform an action that required finalization beforehand.
@@ -48,7 +53,7 @@ def make_body() -> Body:
 def main() -> None:
     """Run the simulation."""
     # Set up a random number generater, used later.
-    RNG_SEED = 5
+    RNG_SEED = 6
     rng = make_rng(RNG_SEED)
 
     # Create a body for the robot.
@@ -73,7 +78,6 @@ def main() -> None:
     # Once a runner finishes a batch, it can be reused to run a new batch.
     # (We only run one batch in this tutorial, so we only use the runner once.)
     asyncio.run(runner.run_batch(batch))
-
 
 if __name__ == "__main__":
     main()
