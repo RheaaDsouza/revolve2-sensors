@@ -314,7 +314,7 @@ class LocalRunner(Runner):
                 Vector3(),
                 Quaternion(),
             )
-
+            print(urdf)
             model = mujoco.MjModel.from_xml_string(urdf)
 
             # mujoco can only save to a file, not directly to string,

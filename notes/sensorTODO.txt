@@ -1,0 +1,10 @@
+_to_urdf in simulation/actor/urdf -> look into adding sensor tag
+in main.py from sinlge robot example -> request position of sensor
+_sensor.py sent the type and name sensor to the sensor tag in urdf
+
+send sensordata to CPG -> keerti
+
+experimentation/revolve2/experimentation/genotypes/cppnwin/modular_robot/_body_genotype.py
+this is where we add sensor so number input and output should be 6
+the cppn is gonna decide whether it is necessary to add a sensor and which one and where
+
