@@ -6,6 +6,7 @@ from ._body_state import BodyState
 from ._brain import Brain
 from ._brick import Brick
 from ._core import Core
+from ._sensor import Sensor
 from ._create_batch_multiple_isolated_robots import (
     create_batch_multiple_isolated_robots,
 )
@@ -20,6 +21,7 @@ from ._morphological_measures import MorphologicalMeasures
 from ._not_finalized_error import NotFinalizedError
 from ._right_angles import RightAngles
 
+
 __all__ = [
     "ActiveHinge",
     "Body",
@@ -27,6 +29,7 @@ __all__ = [
     "Brain",
     "Brick",
     "Core",
+    "Sensor",
     "ModularRobot",
     "Module",
     "MorphologicalMeasures",

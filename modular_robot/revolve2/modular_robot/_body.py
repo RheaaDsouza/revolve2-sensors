@@ -9,6 +9,7 @@ from revolve2.simulation.running._results import ActorState
 from ._active_hinge import ActiveHinge
 from ._body_state import BodyState
 from ._brick import Brick
+from ._sensor import Sensor
 from ._core import Core
 from ._module import Module
 from ._not_finalized_error import NotFinalizedError
@@ -349,6 +350,14 @@ class _ActorBuilder:
                 attachment_offset,
                 orientation,
             )
+        elif isinstance(module, Sensor):
+        self._make_sensor(
+            module,
+            body,
+            name_prefix,
+            attachment_offset,
+            orientation,
+        )
         else:
             raise NotImplementedError("Module type not implemented")
 
@@ -399,6 +408,60 @@ class _ActorBuilder:
                     position + rotation * Vector3([CHILD_OFFSET, 0.0, 0.0]),
                     rotation,
                 )
+    def _make_sensor(
+            self,
+            sensor: Sensor,
+            body: RigidBody,
+            name_prefix: str,
+            attachment_offset: Vector3,
+            orientation: Quaternion,
+    ) -> None:
+        BOUNDING_BOX = Vector3([0.02, 0.02, 0.02])  # Adjust the bounding box size as needed
+        MASS = 0.001  # Adjust the mass as needed
+        CHILD_OFFSET = 0.01  # Adjust the child offset as needed
+
+        position = attachment_offset + orientation * Vector3(
+            [BOUNDING_BOX[0] / 2.0, 0.0, 0.0]
+        )
+
+        body.collisions.append(
+            Collision(
+                name=f"{name_prefix}_sensor_collision",
+                position=position,
+                orientation=orientation,
+                mass=MASS,
+                bounding_box=BOUNDING_BOX,
+                color=sensor.color,  # Use the sensor's color
+            )
+        )
+
+        # Add logic to create connections or attachments for the sensor as needed
+        # For example, you might want to attach the sensor to a specific link.
+
+        # You can also call the `_make_module` function to recursively add child modules
+        # to the sensor if the sensor has child elements.
+
+        # Here's an example of adding child modules to the sensor if it has any:
+        # for name_suffix, child_index, angle in [
+        #     ("front", Sensor.FRONT, 0.0),
+        #     ("left", Sensor.LEFT, math.pi / 2.0),
+        #     ("right", Sensor.RIGHT, math.pi / 2.0 * 3),
+        # ]:
+        #     child = sensor.children[child_index]
+        #     if child is not None:
+        #         rotation = (
+        #                 orientation
+        #                 * Quaternion.from_eulers([0.0, 0.0, angle])
+        #                 * Quaternion.from_eulers([child.rotation, 0, 0])
+        #         )
+        #
+        #         self._make_sensor(
+        #             child,
+        #             body,
+        #             f"{name_prefix}_{name_suffix}",
+        #             position + rotation * Vector3([CHILD_OFFSET, 0.0, 0.0]),
+        #             rotation,
+        #         )
 
     def _make_brick(
         self,
