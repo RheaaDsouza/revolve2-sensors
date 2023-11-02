@@ -351,12 +351,12 @@ class _ActorBuilder:
                 orientation,
             )
         elif isinstance(module, Sensor):
-        self._make_sensor(
-            module,
-            body,
-            name_prefix,
-            attachment_offset,
-            orientation,
+            self._make_sensor(
+                module,
+                body,
+                name_prefix,
+                attachment_offset,
+                orientation,
         )
         else:
             raise NotImplementedError("Module type not implemented")
