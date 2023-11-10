@@ -162,6 +162,13 @@ def _make_links(
                 joint.position,
                 joint.orientation,
             )
+            
+    
+    site = xml.SubElement(link, "site", {"name": "sensor_site"})
+    sensor = xml.SubElement("sensor", {"name": sensor_type})
+    
+    elements.append(site)
+    elements.append(sensor)
 
     # visual = xml.SubElement(link, "visual")
     # geometry = xml.SubElement(visual, "geometry")
