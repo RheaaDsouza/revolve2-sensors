@@ -163,12 +163,7 @@ def _make_links(
                 joint.orientation,
             )
             
-    
-    site = xml.SubElement(link, "site", {"name": "sensor_site"})
-    sensor = xml.SubElement("sensor", {"name": sensor_type})
-    
-    elements.append(site)
-    elements.append(sensor)
+
 
     # visual = xml.SubElement(link, "visual")
     # geometry = xml.SubElement(visual, "geometry")
@@ -176,6 +171,14 @@ def _make_links(
 
     return elements
 
+def _make_sensor():
+    # TODO: add sensor and site coming from _sensor.py
+    # site = xml.SubElement(link, "site", {"name": "sensor_site"})
+    # sensor = xml.SubElement("sensor", {"name": sensor_type})
+    #
+    # elements.append(site)
+    # elements.append(sensor)
+    return 0
 
 def _quaternion_to_euler(quaternion: Quaternion) -> tuple[float, float, float]:
     with warnings.catch_warnings():

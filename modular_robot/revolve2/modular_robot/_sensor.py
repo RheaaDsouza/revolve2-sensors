@@ -25,7 +25,7 @@ class Sensor(Module):
         self.sensor_name = sensor_name
     
 
-    def _add_sensors(self):
+    def _add_sensor(self):
         # Create the sensor tag with the dynamically determined name
         sensor_tag = xml.Element(self.sensor_name)
         return sensor_tag
