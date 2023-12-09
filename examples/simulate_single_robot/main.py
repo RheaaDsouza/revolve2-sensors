@@ -8,7 +8,7 @@ You learn:
 
 import asyncio
 
-from revolve2.ci_group import terrains
+from revolve2.ci_group import terrain
 from revolve2.ci_group.logging import setup_logging
 from revolve2.ci_group.rng import make_rng
 from revolve2.ci_group.simulation import create_batch_single_robot_standard

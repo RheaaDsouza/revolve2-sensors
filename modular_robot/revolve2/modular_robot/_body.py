@@ -68,7 +68,17 @@ class Body:
         if not self.is_finalized:
             raise NotFinalizedError()
         return _ActiveHingeFinder().find(self)
+    def find_sensors(self) -> list[Sensor]:
+        """
+        Find all sensors in the body.
 
+        :returns: A list of all sensors in the body
+        :raises NotFinalizedError: In case this body has not yet been finalized.
+        """
+        if not self.is_finalized:
+            raise NotFinalizedError()
+        return _SensorFinder().find(self)
+    
     def find_bricks(self) -> list[Brick]:
         """
         Find all bricks in the body.
@@ -435,6 +445,13 @@ class _ActorBuilder:
             )
         )
 
+        body.append( 
+                name=f"sensor",
+                position=position,
+                orientation=orientation,
+                site=f'IMU'
+        )
+
         # Add logic to create connections or attachments for the sensor as needed
         # For example, you might want to attach the sensor to a specific link.
 
@@ -654,3 +671,19 @@ class _BrickFinder:
         for child in module.children:
             if child is not None:
                 self._find_recur(child)
+
+
+
+class _SensorFinder:
+    _sensors: list[Sensor]
+
+    def __init__(self) -> None:
+        self._sensors = []
+
+    def find(self, body: Body) -> list[Sensor]:
+        self._find_recur(body.core)
+        return self._sensors
+
+    def _find_recur(self, module: Module) -> None:
+        if isinstance(module, Sensor):
+            self._sensors.append(module)

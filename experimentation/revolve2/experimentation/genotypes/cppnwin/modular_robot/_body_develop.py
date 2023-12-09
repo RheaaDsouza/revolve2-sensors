@@ -4,7 +4,7 @@ from queue import Queue
 from typing import Any
 
 import multineat
-from revolve2.modular_robot import ActiveHinge, Body, Brick, Core, Module
+from revolve2.modular_robot import ActiveHinge, Body, Brick, Core, Module, Sensor
 
 
 @dataclass
@@ -14,6 +14,7 @@ class __Module:
     up: tuple[int, int, int]
     chain_length: int
     module_reference: Module
+    #TODO:sensor?
 
 
 def develop(
@@ -58,6 +59,11 @@ def develop(
             children.append((Brick.RIGHT, 3))
         elif isinstance(module.module_reference, ActiveHinge):
             children.append((ActiveHinge.ATTACHMENT, 0))
+        #TODO: sensor does not have children so check if this is necessary
+        # elif isinstance(module.module_reference, Sensor):
+        #     children.append((Sensor.FRONT, 0))
+        #     children.append((Sensor.LEFT, 1))
+        #     children.append((Sensor.RIGHT, 3))
         else:  # Should actually never arrive here but just checking module type to be sure
             raise RuntimeError()
 
@@ -76,6 +82,7 @@ def __evaluate_cppn(
     body_net: multineat.NeuralNetwork,
     position: tuple[int, int, int],
     chain_length: int,
+    #sensor_type: None
 ) -> tuple[Any, int]:
     """
     Get module type and orientation from a multineat CPPN network.
@@ -92,8 +99,9 @@ def __evaluate_cppn(
     outputs = body_net.Output()
 
     # get module type from output probabilities
-    type_probs = [outputs[0], outputs[1], outputs[2]]
-    types = [None, Brick, ActiveHinge]
+    type_probs = [outputs[0], outputs[1], outputs[2], outputs[3]]
+    #Sensor added
+    types = [None, Brick, ActiveHinge, Sensor]
     module_type = types[type_probs.index(min(type_probs))]
 
     # get rotation from output probabilities

@@ -56,6 +56,9 @@ def to_urdf(
 
     # pass negative position and inverse of orientation of robot to first element
     # so the robot will be positioned and rotated accordingly because the first link tries to compensate
+
+    site = xml.Element("site", {"name": "IMU"})
+
     for el in _make_links(root, tree, -position, orientation.inverse):
         urdf.append(el)
 
