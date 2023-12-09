@@ -94,6 +94,8 @@ class LocalRunner(Runner):
 
         data = mujoco.MjData(model)
 
+
+
         initial_targets = [
             dof_state
             for posed_actor in env_descr.actors
@@ -314,8 +316,20 @@ class LocalRunner(Runner):
                 Vector3(),
                 Quaternion(),
             )
-
             model = mujoco.MjModel.from_xml_string(urdf)
+            data = mujoco.MjData(model)
+
+            # Iterate through the sensors defined in the URDF XML
+
+            for sensor_name in sensor_classes.keys():
+                # Check if the sensor exists in the model, and if so, add it to the URDF XML
+                if data.sensor_exists(sensor_name):
+                    # Create an instance of the Sensor class with the sensor name
+                    sensor = Sensor(sensor_name, rotation, color)
+                    sensor_data.append(data.sensor(sensor).data.copy())
+
+
+
 
             # mujoco can only save to a file, not directly to string,
             # so we create a temporary file.

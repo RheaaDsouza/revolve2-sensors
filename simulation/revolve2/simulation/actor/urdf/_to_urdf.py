@@ -56,6 +56,9 @@ def to_urdf(
 
     # pass negative position and inverse of orientation of robot to first element
     # so the robot will be positioned and rotated accordingly because the first link tries to compensate
+
+    site = xml.Element("site", {"name": "IMU"})
+
     for el in _make_links(root, tree, -position, orientation.inverse):
         urdf.append(el)
 
@@ -162,6 +165,8 @@ def _make_links(
                 joint.position,
                 joint.orientation,
             )
+            
+
 
     # visual = xml.SubElement(link, "visual")
     # geometry = xml.SubElement(visual, "geometry")
@@ -169,6 +174,14 @@ def _make_links(
 
     return elements
 
+def _make_sensor():
+    # TODO: add sensor and site coming from _sensor.py
+    # site = xml.SubElement(link, "site", {"name": "sensor_site"})
+    # sensor = xml.SubElement("sensor", {"name": sensor_type})
+    #
+    # elements.append(site)
+    # elements.append(sensor)
+    return 0
 
 def _quaternion_to_euler(quaternion: Quaternion) -> tuple[float, float, float]:
     with warnings.catch_warnings():

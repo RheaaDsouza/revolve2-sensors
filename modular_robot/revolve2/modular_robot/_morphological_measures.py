@@ -3,6 +3,7 @@ import numpy as np
 from ._active_hinge import ActiveHinge
 from ._body import Body
 from ._brick import Brick
+from ._sensor import Sensor
 from ._core import Core
 from ._module import Module
 from ._not_finalized_error import NotFinalizedError
@@ -32,6 +33,7 @@ class MorphologicalMeasures:
     is_2d: bool
 
     core: Core
+    sensors: list[Sensor]
     bricks: list[Brick]
     active_hinges: list[ActiveHinge]
 
@@ -41,8 +43,19 @@ class MorphologicalMeasures:
     """Bricks which have all slots filled with other modules."""
     filled_bricks: list[Brick]
 
+    """Sensors which have all slots filled with other modules."""
+    filled_sensors: list[Sensor]
+
     """Active hinges which have all slots filled with other modules."""
     filled_active_hinges: list[ActiveHinge]
+
+
+    """
+    Bricks that are only connected to one other module.
+
+    Both children and parent are counted.
+    """
+    single_neighbour_sensors: list[Sensor]
 
     """
     Bricks that are only connected to one other module.
@@ -103,6 +116,7 @@ class MorphologicalMeasures:
 
         self.is_2d = self.__calculate_is_2d(body)
         self.core = body.core
+        self.sensors = body.find_sensors()
         self.bricks = body.find_bricks()
         self.active_hinges = body.find_active_hinges()
         self.core_is_filled = self.__calculate_core_is_filled()
@@ -141,6 +155,7 @@ class MorphologicalMeasures:
             for brick in self.bricks
             if all([child is not None for child in brick.children])
         ]
+
 
     def __calculate_filled_active_hinges(self) -> list[ActiveHinge]:
         return [
@@ -285,7 +300,7 @@ class MorphologicalMeasures:
 
         :returns: The number of modules.
         """
-        return 1 + self.num_bricks + self.num_active_hinges
+        return 1 + self.num_bricks + self.num_active_hinges + self.num_sensors
 
     @property
     def num_bricks(self) -> int:
@@ -295,6 +310,16 @@ class MorphologicalMeasures:
         :returns: The number of bricks.
         """
         return len(self.bricks)
+    
+
+    @property
+    def num_sensors(self) -> int:
+        """
+        Get the number of sensors.
+
+        :returns: The number of sensors.
+        """
+        return len(self.sensors)
 
     @property
     def num_active_hinges(self) -> int:
@@ -322,6 +347,15 @@ class MorphologicalMeasures:
         :returns: The number of bricks.
         """
         return len(self.filled_active_hinges)
+    
+    @property
+    def num_filled_sensors(self) -> int:
+        """
+        Get the number of sensors which have all slots filled with other modules.
+
+        :returns: The number of sensors.
+        """
+        return len(self.filled_sensors)
 
     @property
     def num_filled_modules(self) -> int:
@@ -333,6 +367,7 @@ class MorphologicalMeasures:
         return (
             self.num_filled_bricks
             + self.num_active_hinges
+            + self.num_sensors
             + (1 if self.core_is_filled else 0)
         )
 
@@ -395,6 +430,18 @@ class MorphologicalMeasures:
         :returns: The number of bricks.
         """
         return len(self.single_neighbour_bricks)
+    
+
+    @property
+    def num_single_neighbour_sensors(self) -> int:
+        """
+        Get the number of sensors that are only connected to one other module.
+
+        Both children and parent are counted.
+
+        :returns: The number of sensors.
+        """
+        return len(self.single_neighbour_sensors)
 
     @property
     def max_potential_single_neighbour_bricks(self) -> int:
